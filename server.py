@@ -1,8 +1,33 @@
 from twisted.internet.protocol import Protocol, Factory
 from twisted.internet import reactor
+from random import *
 
 names = []
 previous_messages =""
+
+def RandomHello(login):
+    greetings = [f"Hello Bro {login}",
+                 f"New ROBOT ARRIVED {login}",
+                 f"Replenishment in our family: {login}",
+                 f"Arr, another sailor on the ship, {login}",
+                 f"Мне надоело на английском придумывать приветствия, в общем, встречайте - {login}",
+                 f"And who is hiding around the corner? This is {login}!"
+                 f"'Hello world' {login} said",
+                 f"From the sky to us landed {login}"]
+    return (choice(greetings))
+
+def Smiles(text):
+    smiles = {'<YOY>':'(O.O)',
+              "<hungry>":"(￣﹃￣)",
+              "<facepalm>":"(－‸ლ)",
+              "<cat>":"(=⌒‿‿⌒=)",
+              "<sorry>":"<(_ _)>"}
+
+    for a in dict.keys(smiles):
+        if a in text:
+            text=text.replace(a, smiles[a])
+
+    return (text)
 
 class Client(Protocol):
     ip: str = None
@@ -28,7 +53,14 @@ class Client(Protocol):
 
         print(f"Client connected: {self.ip}")
 
-        self.transport.write("Welcome to the chat v0.1\n\n".encode())
+        self.transport.write("Welcome to the chat v0.5\n\n"
+                             "Список изменений:\n"
+                             "Исключения одинвковых login в чате.\n"
+                             "Отправка предыдущих сообщений новому клиенту.\n"
+                             "Рандомное приветствие нового клиента.\n"
+                             "Добавление смайликов.\n\n"
+                             "Список смайликов:\n"
+                             "<YOY> <hungry> <facepalm> <cat> <sorry>\n\n".encode())
         self.transport.write(previous_messages.encode())
 
     def dataReceived(self, data: bytes):
@@ -54,7 +86,7 @@ class Client(Protocol):
                 else:
                     names.append(self.login)
 
-                    notification = f"New user connected: {self.login}"
+                    notification = RandomHello(self.login)
 
                     self.factory.notify_all_users(notification)
                     print(notification)
@@ -104,7 +136,7 @@ class Chat(Factory):
         global previous_messages
 
         for user in self.clients:
-            user.transport.write(f"{data}\n".encode())
+            user.transport.write(f"{Smiles(data)}\n".encode())
         previous_messages+=(f"{data}\n")
 
 
